@@ -1,160 +1,102 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+https://api.telegram.org/@NEPSEnepal_Bot:7096733098:AAGrWRrjqgm2hqaFaIH_VuvCbpJ7bjEANPk
+from selenium import webdriver
+ from selenium.webdriver.chrome.options import Options
+ from selenium.webdriver.chrome.service import Service
+ from selenium.webdriver.common.by import By
+ from selenium.webdriver.support.ui import WebDriverWait
+ from selenium.webdriver.support import expected_conditions as EC
+ from tabulate import tabulate
+ from telegram import Update, Bot
+ from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+ import asyncio
+ import time
+ 
+ url = https://merolagani.com/LatestMarket.aspx
+ chrome_options = Options()
+ chrome_options.add_argument('--headless')
+ chrome_service = Service()
+async def track_stock_loop(bot: Bot):
+    global tracking_enabled, driver, old_price
 
-# C extensions
-*.so
+    if tracking_enabled:
+        while True:
+            if not tracking_enabled:
+                break
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+            new_price = driver.find_element('css selector', 'h2.intraday__price').text.replace(",", "").replace("$\n", "").strip()
+            new_price = round(float(new_price), 2)
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+            if new_price != old_price:
+                change = round((old_price - new_price), 2)
+                from_previous_close_flat, from_previous_close_percentage = up_down_calc(driver, new_price)
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+                update_string = f"NEPSE: {comp_name}\nCurrent Price: {new_price}$\nChange: {change}$\nFlat Change From Previous Close: {from_previous_close_flat}$\n% Change From Previous Close: {from_previous_close_percentage}%\n"
+                old_price = new_price
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
+                print(update_string)
+                await bot.send_message(chat_id=YOUR_CHAT_ID, text=update_string)
 
-# Translations
-*.mo
-*.pot
+            await asyncio.sleep(1)  # Delay between each iteration
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+await bot.send_message(chat_id= @NEPSEnepal_Bot text=update_string)
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text('   Hi, I am a stock tracker bot. If you wish to track the price of your favorite stock plese use  /setstockindex command first. If you need further help just use /help for additional information.')
 
-# Flask stuff:
-instance/
-.webassets-cache
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("""I can help you track your favorite stock price live!!
 
-# Scrapy stuff:
-.scrapy
+The default stock that is set to the bot is Dow Jones Industrial Average.
+So the first thing you should do is set your target stock index and then use any command that you would like.
 
-# Sphinx documentation
-docs/_build/
+Commands:
 
-# PyBuilder
-.pybuilder/
-target/
+/setstockindex [Your stock index] - set the stock index that you would like to track
 
-# Jupyter Notebook
-.ipynb_checkpoints
+/status - check the status of the stock market
 
-# IPython
-profile_default/
-ipython_config.py
+/track - start tracking the price
 
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
+/stop - stop tracking the price
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+/keydata - get the Key Data
+""")
+async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(status)
 
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
+def getting_key_data(driver):
+    df = {}
+    WebDriverWait(driver, 60).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'li.kv__item')))
+    key_data_containers = driver.find_elements(By.CSS_SELECTOR, 'li.kv__item')
+    for key_data_container in key_data_containers:
+        label = key_data_container.find_element(By.CSS_SELECTOR, 'small.label').text
+        value = key_data_container.find_element(By.CSS_SELECTOR, 'span.primary').text
+        df[f'{label}'] = value
+    return df 
+if __name__ == '__NEPSE__':
+    # Create the driver instance
+    driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
 
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/#use-with-ide
-.pdm.toml
+    # Load the initial URL
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(load_url(driver))
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
+    # Telegram bot setup
+    app = NEPSE Application.builder().token(7096733098:AAGrWRrjqgm2hqaFaIH_VuvCbpJ7bjEANPk
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+).build()
 
-# SageMath parsed files
-*.sage.py
+    app.add_handler(CommandHandler('start', start_command))
+    app.add_handler(CommandHandler('help', help_command))
+    app.add_handler(CommandHandler('status', status_command))
+    app.add_handler(CommandHandler('keydata', key_data_command))
+    app.add_handler(CommandHandler('setstockindex', set_stock_index_command))
+    app.add_handler(CommandHandler('track', start_tracking_command))
+    app.add_handler(CommandHandler('stop', stop_tracking_command))
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+    app.add_error_handler(error)
 
-# Spyder project settings
-.spyderproject
-.spyproject
+    # Start tracking stock in a separate task
+    loop.create_task(track_stock_loop(app.bot))
 
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+    print('Polling...')
+    app.run_polling(poll_interval=5)
